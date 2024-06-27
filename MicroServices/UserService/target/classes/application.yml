@@ -1,0 +1,68 @@
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ratingHotelBreaker:
+        register-health-indicator: true
+        event-consumer-buffer-size: 10
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state:
+          seconds: 6
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+
+  retry:
+    instances:
+      ratingHotelService:
+        max-attempts: 3
+        wait-duration:
+          seconds: 5
+
+  ratelimiter:
+    instances:
+      userRateLimiter:
+        limit-refresh-period:
+          seconds: 4
+        limit-for-period: 2
+        timeout-duration:
+          seconds: 2
+
+
+okta:
+  oauth2:
+    issuer: https://dev-94646799.okta.com/oauth2/default
+    audience: api://default
+
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev-94646799.okta.com/oauth2/default
+      client:
+        registration:
+          my-internal-client:
+            provider: okta
+            authorization-grant-type: client_credentials
+            scope: internal
+            client-id: 0oagh7vwwd2qJ0fXn5d7
+            client-secret: RWs9OF9quTWyFDW-29GHltse8bizyCe_Oc660OESD8pa59U_0k1R7J3UPuMortuz
+
+        provider:
+          okta:
+            issuer-uri: https://dev-94646799.okta.com/oauth2/default
